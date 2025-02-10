@@ -9,8 +9,7 @@ sample : csa-attack mon0 00:11:22:33:44:55 66:77:88:99:AA:BB
 ```
 
 ## 결과
-![send packet](./img/send_packet.png)
-![disconnect wifi](./img/discon_wifi.gif)
+![send packet](./img/image.png)
 
 ## 상세
 상세
