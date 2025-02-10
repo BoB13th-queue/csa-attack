@@ -15,6 +15,7 @@ namespace RadioConstants
     constexpr uint32_t FLAG_SSI_SIGNAL = 0x00000020;
     constexpr uint32_t FLAG_ANTENNA = 0x00000040;
     constexpr uint32_t FLAG_RX_FLAGS = 0x00000080;
+    constexpr uint8_t FCS_FLAG_OFF_MASK = ~0x10;
 }
 
 class RadiotapHeader
@@ -159,6 +160,7 @@ public:
             if (offset >= bytes.size())
                 throw std::runtime_error("flags 필드를 위한 데이터가 부족합니다.");
             flags = bytes[offset++];
+            flags &= RadioConstants::FCS_FLAG_OFF_MASK; // FCS flag 제거
         }
         if (primary_present & RadioConstants::FLAG_DATA_RATE)
         {
@@ -216,10 +218,11 @@ public:
         os << "flags: 0x" << std::hex << std::to_string(header.flags) << std::dec << std::endl;
         os << "data_rate: " << std::to_string(header.data_rate) << std::endl;
         os << "channel_freq: " << std::to_string(header.channel_freq) << std::endl;
-        os << "channel_flags: " << std::to_string(header.channel_flags) << std::endl;
+        os << "channel_flags: 0x" << std::hex << header.channel_flags << std::dec << std::endl;
         os << "ssi_signal: " << std::to_string(header.ssi_signal) << std::endl;
         os << "antenna: " << std::to_string(header.antenna) << std::endl;
-        os << "rx_flags: " << std::to_string(header.rx_flags) << std::endl;
+        os << "rx_flags: 0x" << std::hex << header.rx_flags << std::dec << std::endl
+           << std::endl;
         return os;
     }
 };

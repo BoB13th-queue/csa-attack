@@ -109,9 +109,9 @@ public:
         taggedParams.parseBytes(bytes, offset);
     }
 
-    void parseBytes(const uint8_t *bytes)
+    void parseBytes(const uint8_t *bytes, size_t length)
     {
-        std::vector<uint8_t> vec(bytes, bytes + 36);
+        std::vector<uint8_t> vec(bytes, bytes + length);
         parseBytes(vec);
     }
 
@@ -126,7 +126,7 @@ public:
         os << "Fixed Parameters: " << std::endl
            << frame.fixedParams;
         os << "Tagged Parameters: " << std::endl
-           << frame.taggedParams;
+           << frame.taggedParams << std::endl;
         return os;
     }
 };

@@ -56,9 +56,9 @@ public:
 
     friend std::ostream &operator<<(std::ostream &os, const ManagementFixedParameters &param)
     {
-        os << "ManagementFixedParameters{timestamp=" << std::to_string(param.timestamp)
-           << ", beaconInterval=" << std::to_string(param.beaconInterval)
-           << ", capabilityInfo=" << std::to_string(param.capabilityInfo) << "}";
+        os << "\ttimestamp: " << std::to_string(param.timestamp) << std::endl
+           << "\tbeaconInterval " << std::to_string(param.beaconInterval) << std::endl
+           << "\tcapabilityInfo " << std::to_string(param.capabilityInfo) << std::endl;
         return os;
     }
 };

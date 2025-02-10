@@ -20,6 +20,7 @@ sample : csa-attack mon0 00:11:22:33:44:55 66:77:88:99:AA:BB
 Field | Value (hexa decimal)
 --- | ---
 Tag Number(CSA) | 37(25)
+Tag Length | 3(03)
 Channel Switch Mode | 1(01)
 New Channel Number | 11(0B)
 Channel Switch Count | 3(03)

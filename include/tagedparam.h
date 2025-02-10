@@ -15,6 +15,9 @@ public:
     uint8_t length;            // 태그 길이
     std::vector<uint8_t> data; // 태그 데이터
 
+    TaggedParameter() : id(0), length(0), data() {}
+    TaggedParameter(uint8_t id, uint8_t length, std::vector<uint8_t> data) : id(id), length(length), data(data) {}
+
     std::vector<uint8_t> toBytes() const
     {
         std::vector<uint8_t> bytes;
@@ -28,14 +31,9 @@ public:
         return bytes;
     }
 
-    // bytes 벡터에서 단일 태그드 파라미터를 파싱합니다.
-    // offset은 파싱한 만큼 증가시킵니다.
+    // 벡터 버전: bytes 벡터에서 단일 태그드 파라미터 파싱 (offset이 증가됨)
     void parseBytes(const std::vector<uint8_t> &bytes, size_t &offset)
     {
-        if (offset + 2 > bytes.size())
-        {
-            throw std::runtime_error("태그드 파라미터 헤더를 위한 데이터가 부족합니다.");
-        }
         id = bytes[offset++];
         length = bytes[offset++];
         if (offset + length > bytes.size())
@@ -46,10 +44,21 @@ public:
         offset += length;
     }
 
-    void parseBytes(const uint8_t *bytes, size_t &offset)
+    // 포인터 버전: 전체 데이터의 길이(totalLength)를 이용해 파싱
+    void parseBytes(const uint8_t *bytes, size_t totalLength, size_t &offset)
     {
-        std::vector<uint8_t> vec(bytes, bytes + 2);
-        parseBytes(vec, offset);
+        if (offset + 2 > totalLength)
+        {
+            throw std::runtime_error("--태그드 파라미터 헤더를 위한 데이터가 부족합니다.");
+        }
+        id = bytes[offset++];
+        length = bytes[offset++];
+        if (offset + length > totalLength)
+        {
+            throw std::runtime_error("-태그드 파라미터 데이터를 위한 데이터가 부족합니다.");
+        }
+        data.assign(bytes + offset, bytes + offset + length);
+        offset += length;
     }
 
     bool operator==(const TaggedParameter &other) const
@@ -79,7 +88,9 @@ public:
 
     friend std::ostream &operator<<(std::ostream &os, const TaggedParameter &param)
     {
-        os << "TaggedParameter{id=" << std::to_string(param.id) << ", length=" << std::to_string(param.length) << ", data=[";
+        os << "id: " << std::to_string(param.id) << std::endl
+           << "length: " << std::to_string(param.length) << std::endl
+           << "data: {";
         for (size_t i = 0; i < param.data.size(); i++)
         {
             os << std::to_string(param.data[i]);
@@ -88,7 +99,7 @@ public:
                 os << ", ";
             }
         }
-        os << "]}";
+        os << "}";
         return os;
     }
 };
@@ -110,22 +121,29 @@ public:
         return bytes;
     }
 
-    // bytes 벡터에서 태그드 파라미터들을 순차적으로 파싱합니다.
+    // 벡터 버전: bytes 벡터에서 순차적으로 태그드 파라미터들을 파싱
     void parseBytes(const std::vector<uint8_t> &bytes, size_t &offset)
     {
         parameters.clear();
-        // 남은 데이터가 최소 2바이트 이상일 때 파싱
         while (offset + 1 < bytes.size())
         {
-            TaggedParameter param;
-            param.parseBytes(bytes, offset);
-            parameters.push_back(param);
+            try
+            {
+                TaggedParameter param;
+                param.parseBytes(bytes, offset);
+                parameters.push_back(param);
+            }
+            catch (const std::exception &e)
+            {
+                break;
+            }
         }
     }
 
-    void parseBytes(const uint8_t *bytes, size_t &offset)
+    // 포인터 버전: 전체 데이터의 길이(totalLength)를 이용해 순차적으로 파싱
+    void parseBytes(const uint8_t *bytes, size_t totalLength, size_t &offset)
     {
-        std::vector<uint8_t> vec(bytes, bytes + 2);
+        std::vector<uint8_t> vec(bytes, bytes + totalLength);
         parseBytes(vec, offset);
     }
 
@@ -136,6 +154,7 @@ public:
 
     friend std::ostream &operator<<(std::ostream &os, const TaggedParameters &params)
     {
+        os << "Taged Pram Cnt: " << params.parameters.size() << std::endl;
         for (const auto &param : params.parameters)
         {
             os << param << std::endl;
